@@ -1,0 +1,32 @@
+---
+title: "Coinhive keys used on top websites during 2017 year"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(rjson)
+ 
+setwd("/Users/innaazarova/Documents/DS-group-by-key")
+data=as.data.frame(fromJSON(file= "data-for-r.json" ))
+
+data %>%
+  arrange(y) %>%
+  mutate(x=factor(x,x)) %>%
+  ggplot( aes(x=x, y=y)) +
+    geom_segment( aes(x=x, xend=x, y=0, yend=y), color="skyblue", size=1) +
+    geom_point( color="blue", size=4, alpha=0.6) +
+    theme_light() +
+    coord_flip() +
+    theme(
+      panel.grid.major.y = element_blank(),
+      panel.border = element_blank(),
+      axis.ticks.y = element_blank()
+    ) +
+  xlab("Coinhive Keys") +
+  ylab("Number of Websites")
+ 
+```
+
+
+
