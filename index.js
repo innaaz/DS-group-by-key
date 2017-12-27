@@ -36,9 +36,11 @@ readFiles(fileNames).then(siteKeyPairs => {
   fs.writeFileSync('./key-counts.json', JSON.stringify(keyCounts, null, 2))
 
   const dataForR = Object.keys(keyCounts)
-    .reduce((output, key, index) => 
-      output.concat({x: key, y: keyCounts[key]})
-    , [])
+    .reduce((output, key, index) => {
+      output.x.push(key)
+      output.y.push(keyCounts[key])
+      return output
+    }, {x: [], y: []})
 
   fs.writeFileSync('./data-for-r.json', JSON.stringify(dataForR, null, 2))
 })
