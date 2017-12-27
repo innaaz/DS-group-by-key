@@ -1,7 +1,7 @@
 const fs = require('fs')
 
-// const inputDir = '/home/local/download_30-11_0-500_filtered/'
-const inputDir = './input/'
+const inputDir = '/home/local/download_30-11_0-500_filtered/'
+// const inputDir = './input/'
 
 const fileNames = fs.readdirSync(inputDir)
 console.log(`Number of files: ${fileNames.length}`)
@@ -17,38 +17,30 @@ readFiles(fileNames).then(siteKeyPairs => {
       return uniq
     }, {})
 
-  const keyCounts = Object.keys(uniqueSiteKeyPairs)
-    .reduce((keyCounts, i) => {
-      const { key } = uniqueSiteKeyPairs[i]
-      keyCounts[key] = (keyCounts[key] || 0) + 1
+  const grouped = Object.keys(uniqueSiteKeyPairs)
+    .reduce((grouped, i) => {
+      const { key, site } = uniqueSiteKeyPairs[i]
+      grouped[key] = (grouped[key] || []).concat(site)
+      return grouped
+    }, {})
+  console.log(`Unique miner keys: ${Object.keys(grouped).length}`)
+
+  fs.writeFileSync('./sites-by-key.json', JSON.stringify(grouped, null, 2))
+
+  const keyCounts = Object.keys(grouped)
+    .reduce((keyCounts, key) => {
+      keyCounts[key] = grouped[key].length
       return keyCounts
     }, {})
-  // keyCounts is:
-  // {
-  //   'Expecting': 500,
-  //   '234AOT753GD': 5,
-  //   '7825DFS5FDH': 3
-  //   ...
-  // }
-  // where number is how many sites use the key
 
-  const keyCountsKeys = Object.keys(keyCounts)
-  console.log(`Unique miner keys: ${keyCountsKeys.length}`)
-  const output = keyCountsKeys
-    .reduce((output, key, index) => {
-      progress('output', index, keyCountsKeys.length)
-      return output.concat({x: key, y: keyCounts[key]})
-    }, [])
-  // output is how R expects it:
-  // [
-  //   {x: 'Expecting', y: 500},
-  //   {x: '234AOT753GD', y: 5},
-  //   {x: '7825DFS5FDH', y: 3}
-  // ]
+  fs.writeFileSync('./key-counts.json', JSON.stringify(keyCounts, null, 2))
 
-  const outputContent = JSON.stringify(output, null, 2)
-  console.log(`\n${outputContent}\n`)
-  fs.writeFileSync('./data-for-r.json', outputContent)
+  const dataForR = Object.keys(keyCounts)
+    .reduce((output, key, index) => 
+      output.concat({x: key, y: keyCounts[key]})
+    , [])
+
+  fs.writeFileSync('./data-for-r.json', JSON.stringify(dataForR, null, 2))
 })
 
 function readFiles(fileNames) {
